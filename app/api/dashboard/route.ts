@@ -1,35 +1,75 @@
-import { asc, desc, eq } from "drizzle-orm";
-import { getDb } from "../../../db";
-import { priceRecords, products, promotionTags } from "../../../db/schema";
-const number = (value: unknown, fallback = 0) => Number.isFinite(Number(value)) ? Number(value) : fallback;
+import { NextRequest, NextResponse } from "next/server";
+import { drizzle } from "drizzle-orm/libsql";
+import { products, priceRecords, promotionTags } from "@/lib/db/schema";
+import { eq, desc } from "drizzle-orm";
+import { createClient } from "@libsql/client";
+
+// 初始化数据库连接
+const client = createClient({
+  url: process.env.DATABASE_URL!,
+  authToken: process.env.DATABASE_AUTH_TOKEN,
+});
+const db = drizzle(client);
+
 export async function GET() {
   try {
-    const db = getDb();
-    return Response.json({
-      products: await db.select().from(products).orderBy(desc(products.id)),
-      priceRecords: await db.select().from(priceRecords).orderBy(desc(priceRecords.recordedAt), desc(priceRecords.id)),
-      promotionTags: await db.select().from(promotionTags).orderBy(asc(promotionTags.name)),
+    const [allProducts, allPriceRecords, allPromotionTags] = await Promise.all([
+      db.select().from(products).orderBy(products.name),
+      db.select().from(priceRecords).orderBy(desc(priceRecords.recordedAt)),
+      db.select().from(promotionTags),
+    ]);
+
+    return NextResponse.json({
+      products: allProducts,
+      priceRecords: allPriceRecords,
+      promotionTags: allPromotionTags,
     });
-  } catch (error) { return Response.json({ error: error instanceof Error ? error.message : "读取数据失败" }, { status: 500 }); }
+  } catch (error) {
+    console.error("Database error:", error);
+    return NextResponse.json(
+      { error: "数据库连接失败" },
+      { status: 500 }
+    );
+  }
 }
-export async function POST(request: Request) {
+
+export async function POST(request: NextRequest) {
   try {
-    const { type, payload: p = {} } = await request.json() as { type?: string; payload?: Record<string, unknown> };
-    const db = getDb();
-    if (type === "product" || type === "updateProduct") {
-      const id = Number(p.id), name = String(p.name ?? "").trim(), quantity = Number(p.quantity);
-      if (!name || !Number.isFinite(quantity) || quantity <= 0) return Response.json({ error: "请填写商品名称和有效规格" }, { status: 400 });
-      const values = { name, brand:String(p.brand??"").trim(), category:String(p.category??"其他").trim()||"其他", quantity, unit:String(p.unit??"g"), protein:number(p.protein), fat:number(p.fat), saturatedFat:number(p.saturatedFat), carbohydrate:number(p.carbohydrate), sugar:number(p.sugar), fiber:number(p.fiber), sodium:number(p.sodium), energy:number(p.energy), targetUnitPrice:p.targetUnitPrice ? number(p.targetUnitPrice) : null };
-      const product = type === "product" ? await db.insert(products).values(values).returning() : await db.update(products).set(values).where(eq(products.id,id)).returning();
-      return Response.json({ product: product[0] }, { status: type === "product" ? 201 : 200 });
+    const { type, payload } = await request.json();
+
+    switch (type) {
+      case "product": {
+        const result = await db.insert(products).values(payload).returning();
+        return NextResponse.json({ success: true, data: result });
+      }
+      case "updateProduct": {
+        const { id, ...data } = payload;
+        await db.update(products).set(data).where(eq(products.id, id as number));
+        return NextResponse.json({ success: true });
+      }
+      case "price": {
+        const result = await db.insert(priceRecords).values(payload).returning();
+        return NextResponse.json({ success: true, data: result });
+      }
+      case "updatePrice": {
+        const { id, ...data } = payload;
+        await db.update(priceRecords).set(data).where(eq(priceRecords.id, id as number));
+        return NextResponse.json({ success: true });
+      }
+      case "tag": {
+        const result = await db.insert(promotionTags).values({
+          name: payload.name as string,
+        }).returning();
+        return NextResponse.json({ success: true, data: result });
+      }
+      default:
+        return NextResponse.json({ error: "未知操作类型" }, { status: 400 });
     }
-    if (type === "price" || type === "updatePrice") {
-      const id=Number(p.id), price=Number(p.price); if (!Number.isFinite(price)||price<=0) return Response.json({error:"请填写有效价格"},{status:400});
-      const values={price,priceType:String(p.priceType??"促销价"),promotionTag:String(p.promotionTag??""),store:String(p.store??""),recordedAt:String(p.recordedAt??new Date().toISOString().slice(0,10)),note:String(p.note??"")};
-      const record=type==="price" ? await db.insert(priceRecords).values({...values,productId:Number(p.productId)}).returning() : await db.update(priceRecords).set(values).where(eq(priceRecords.id,id)).returning();
-      return Response.json({record:record[0]},{status:type==="price"?201:200});
-    }
-    if (type === "tag") { const name=String(p.name??"").trim(); if (!name) return Response.json({error:"请输入活动名称"},{status:400}); const tag=await db.insert(promotionTags).values({name}).onConflictDoNothing().returning(); return Response.json({tag:tag[0]},{status:201}); }
-    return Response.json({error:"未知操作"},{status:400});
-  } catch(error) { return Response.json({error:error instanceof Error?error.message:"保存失败"},{status:500}); }
+  } catch (error) {
+    console.error("API error:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "操作失败" },
+      { status: 500 }
+    );
+  }
 }
