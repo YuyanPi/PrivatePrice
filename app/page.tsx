@@ -41,7 +41,6 @@ type Data = {
 const today = new Date().toISOString().slice(0, 10);
 const fmt = (v: number) => v.toFixed(2);
 
-// 营养成分显示顺序
 const NUTRITION_ORDER = [
   { key: "energy", label: "能量", unit: "kJ" },
   { key: "protein", label: "蛋白质", unit: "g" },
@@ -53,7 +52,6 @@ const NUTRITION_ORDER = [
   { key: "sodium", label: "钠", unit: "mg" },
 ];
 
-// 计算单位价格（每100g/ml）
 const calcUnitPrice = (totalPrice: number, product: Product) => {
   if (product.unit === "g" || product.unit === "ml") {
     return (totalPrice / product.quantity) * 100;
