@@ -16,7 +16,7 @@ export const products = sqliteTable("products", {
   fiber: real("fiber").notNull().default(0),
   sodium: real("sodium").notNull().default(0),
   energy: real("energy").notNull().default(0),
-  targetTotalPrice: real("target_total_price"), // 目标总价（好价）
+  targetTotalPrice: real("target_total_price"), // ← 从 targetUnitPrice 改为 targetTotalPrice
   createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
 });
 
@@ -29,10 +29,10 @@ export const promotionTags = sqliteTable("promotion_tags", {
 export const priceRecords = sqliteTable("price_records", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   productId: integer("product_id").notNull().references(() => products.id),
-  totalPrice: real("total_price").notNull(), // 总价
+  totalPrice: real("total_price").notNull(), // ← 从 price 改为 totalPrice
   priceType: text("price_type").notNull().default("促销价"),
   promotionTag: text("promotion_tag").notNull().default(""),
-  platform: text("platform").notNull().default("其他"), // 平台
+  platform: text("platform").notNull().default("其他"), // ← 新增
   store: text("store").notNull().default(""),
   recordedAt: text("recorded_at").notNull(),
   note: text("note").notNull().default(""),
