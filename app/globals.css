@@ -352,4 +352,38 @@ td .muted {
 }
 .clear-btn:hover {
   background: #f0f2f3;
-  color: #b642
+  color: #b64239;
+}
+
+@media (max-width: 760px) {
+  main {
+    padding: 28px 16px 50px;
+  }
+  .today {
+    display: none;
+  }
+  .summary,
+  .cards,
+  .split,
+  .entry-grid {
+    grid-template-columns: 1fr;
+  }
+  nav {
+    overflow-x: auto;
+  }
+  .table-wrapper {
+    border-radius: 12px;
+    margin: 0 -4px;
+  }
+  th,
+  td {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+  td strong {
+    font-size: 0.82rem;
+  }
+  th .unit-label {
+    font-size: 0.6rem;
+  }
+}
