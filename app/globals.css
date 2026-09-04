@@ -1,110 +1,33 @@
-/* ===== 对比表格样式 ===== */
-.table-wrapper {
-  overflow-x: auto;
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  background: #fff;
+/* 快速操作栏 */
+.quick-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px 0 4px;
 }
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  border-spacing: 0;
-  font-size: 0.9rem;
-  min-width: 700px;
-}
-
-th,
-td {
-  padding: 12px 14px;
-  text-align: center;
-  border-bottom: 1px solid #edf1f1;
-  white-space: nowrap;
-}
-
-th {
-  background: #f8fafb;
-  color: #52636a;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-th:first-child,
-td:first-child {
-  text-align: left;
-  padding-left: 18px;
-}
-
-th:last-child,
-td:last-child {
-  text-align: right;
-  padding-right: 18px;
-}
-
-th .unit-label {
-  font-weight: 400;
-  color: #8a9a9f;
-  font-size: 0.7rem;
-}
-
-td strong {
-  display: block;
-  font-size: 0.92rem;
-}
-
-td .muted {
-  font-size: 0.75rem;
-  color: #8a9a9f;
-}
-
-.price-cell {
-  font-weight: 700;
-  color: #075f63;
-}
-
-.best-value {
-  position: relative;
-  font-weight: 700;
-  color: #075f63;
-  background: #f0f7f8;
-}
-
-.best-badge {
-  display: inline-block;
-  margin-left: 4px;
-  color: #f5a623;
-  font-size: 0.7rem;
-}
-
-.clear-btn {
+.quick-actions .primary {
   border: 0;
-  background: transparent;
-  color: #8a9a9f;
-  font-size: 0.85rem;
-  padding: 6px 12px;
-  border-radius: 8px;
+  border-radius: 10px;
+  background: #075f63;
+  color: #fff;
+  padding: 12px 24px;
+  font-weight: 700;
+  font-size: 1rem;
   transition: background 0.2s;
 }
-.clear-btn:hover {
-  background: #f0f2f3;
-  color: #b64239;
+.quick-actions .primary:hover {
+  background: #064a4d;
 }
-
-@media (max-width: 760px) {
-  .table-wrapper {
-    border-radius: 12px;
-    margin: 0 -4px;
-  }
-  th,
-  td {
-    padding: 10px 12px;
-    font-size: 0.8rem;
-  }
-  td strong {
-    font-size: 0.82rem;
-  }
-  th .unit-label {
-    font-size: 0.6rem;
-  }
+.quick-actions .secondary {
+  border: 1px solid #dbe5e6;
+  border-radius: 10px;
+  background: #fff;
+  color: #075f63;
+  padding: 12px 24px;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+.quick-actions .secondary:hover {
+  background: #f0f7f8;
 }
