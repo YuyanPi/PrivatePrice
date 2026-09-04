@@ -41,6 +41,7 @@ type Data = {
 const today = new Date().toISOString().slice(0, 10);
 const fmt = (v: number) => v.toFixed(2);
 
+// ★ 营养成分固定显示顺序
 const NUTRITION_ORDER = [
   { key: "energy", label: "能量", unit: "kJ" },
   { key: "protein", label: "蛋白质", unit: "g" },
@@ -52,7 +53,6 @@ const NUTRITION_ORDER = [
   { key: "sodium", label: "钠", unit: "mg" },
 ];
 
-// 计算单位价格（每100g/ml）- 总价 ÷ 总规格 × 100
 const calcUnitPrice = (totalPrice: number, product: Product) => {
   if (product.unit === "g" || product.unit === "ml") {
     return (totalPrice / product.quantity) * 100;
@@ -120,7 +120,6 @@ export default function Home() {
 
         let status = "待记录";
 
-        // ★ 好价判断：将目标总价转换为单位价格进行比较
         if (currentUnit !== null && product.targetTotalPrice !== null) {
           const targetUnitPrice = calcUnitPrice(product.targetTotalPrice, product);
           if (currentUnit <= targetUnitPrice) {
@@ -358,10 +357,10 @@ export default function Home() {
       <nav>
         {(
           [
-            ["overview", "概览"],
-            ["products", "商品"],
-            ["prices", "价格记录"],
-            ["compare", "营养对比"],
+            ["overview", "📊 概览"],
+            ["products", "📦 商品管理"],
+            ["prices", "💰 价格记录"],
+            ["compare", "📈 营养对比"],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -382,6 +381,16 @@ export default function Home() {
         <>
           {active === "overview" && (
             <section className="content">
+              {/* ★ 新增：快速操作栏 */}
+              <div className="quick-actions">
+                <button className="primary" onClick={() => setActive("products")}>
+                  ➕ 新增商品
+                </button>
+                <button className="secondary" onClick={() => setActive("prices")}>
+                  💰 记录价格
+                </button>
+              </div>
+
               <div className="summary">
                 <article>
                   <span>已登记商品</span>
@@ -548,6 +557,7 @@ export default function Home() {
                       <tr>
                         <th>商品</th>
                         <th>规格</th>
+                        {/* ★ NUTRITION_ORDER 保证顺序固定 */}
                         {NUTRITION_ORDER.map(({ key, label, unit }) => (
                           <th key={key}>
                             {label}
@@ -582,6 +592,7 @@ export default function Home() {
                                 {product.quantity}
                                 {product.unit}
                               </td>
+                              {/* ★ 按 NUTRITION_ORDER 顺序渲染 */}
                               {NUTRITION_ORDER.map(({ key }) => {
                                 const val = (product[key as keyof Product] as number) || 0;
                                 const best = isBest(key);
