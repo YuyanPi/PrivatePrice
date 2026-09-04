@@ -52,6 +52,7 @@ const NUTRITION_ORDER = [
   { key: "sodium", label: "钠", unit: "mg" },
 ];
 
+// 计算单位价格（每100g/ml）- 总价 ÷ 总规格 × 100
 const calcUnitPrice = (totalPrice: number, product: Product) => {
   if (product.unit === "g" || product.unit === "ml") {
     return (totalPrice / product.quantity) * 100;
@@ -118,12 +119,13 @@ export default function Home() {
           : null;
 
         let status = "待记录";
-        if (
-          currentUnit !== null &&
-          product.targetTotalPrice !== null &&
-          currentUnit <= calcUnitPrice(product.targetTotalPrice, product)
-        ) {
-          status = "好价";
+
+        // ★ 好价判断：将目标总价转换为单位价格进行比较
+        if (currentUnit !== null && product.targetTotalPrice !== null) {
+          const targetUnitPrice = calcUnitPrice(product.targetTotalPrice, product);
+          if (currentUnit <= targetUnitPrice) {
+            status = "好价";
+          }
         } else if (
           currentUnit !== null &&
           min !== null &&
@@ -206,7 +208,7 @@ export default function Home() {
             step="0.01"
             required
             defaultValue={product?.quantity}
-            placeholder="总规格"
+            placeholder="总规格（如：2500）"
           />
           <select name="unit" defaultValue={product?.unit ?? "g"}>
             <option value="g">g</option>
@@ -231,7 +233,7 @@ export default function Home() {
           min="0"
           step="0.01"
           defaultValue={product?.targetTotalPrice ?? ""}
-          placeholder="目标总价（元）"
+          placeholder="目标好价总价（元）"
         />
         <button className="primary" type="submit">
           {product ? "保存修改" : "保存商品"}
@@ -437,9 +439,14 @@ export default function Home() {
                           : "录入价格后自动计算"}
                       </p>
                       {product.targetTotalPrice && (
-                        <p className="muted" style={{ fontSize: "0.78rem" }}>
-                          目标好价: ¥{fmt(product.targetTotalPrice)}
-                        </p>
+                        <div style={{ fontSize: "0.78rem", marginTop: "4px" }}>
+                          <p className="muted" style={{ margin: "2px 0" }}>
+                            目标好价总价: ¥{fmt(product.targetTotalPrice)}
+                          </p>
+                          <p style={{ margin: "2px 0", color: "#075f63", fontWeight: 600 }}>
+                            ≈ {fmt(calcUnitPrice(product.targetTotalPrice, product))} {unitLabel(product.unit)}
+                          </p>
+                        </div>
                       )}
                       <dl>
                         <div>
@@ -473,7 +480,8 @@ export default function Home() {
                       <span>
                         {p.brand || "未填写品牌"} · {p.quantity}
                         {p.unit}
-                        {p.targetTotalPrice && ` · 目标价 ¥${fmt(p.targetTotalPrice)}`}
+                        {p.targetTotalPrice && ` · 目标总价 ¥${fmt(p.targetTotalPrice)}`}
+                        {p.targetTotalPrice && ` (≈${fmt(calcUnitPrice(p.targetTotalPrice, p))}${unitLabel(p.unit)})`}
                       </span>
                       <button onClick={() => setEditingProduct(p)}>编辑</button>
                     </div>
@@ -501,6 +509,7 @@ export default function Home() {
                         <strong>{p?.name ?? "商品"}</strong>
                         <span>
                           ¥{fmt(r.totalPrice)} · {r.priceType} {r.promotionTag && `· ${r.promotionTag}`}
+                          {p && ` (≈${fmt(calcUnitPrice(r.totalPrice, p))}${unitLabel(p.unit)})`}
                         </span>
                         <small>
                           {r.recordedAt} · {r.platform} {r.store && `· ${r.store}`}
