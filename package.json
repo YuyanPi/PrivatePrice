@@ -1,0 +1,23 @@
+{
+  "name": "nutrition-price-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {"build":"vinext build","dev":"vite","db:generate":"drizzle-kit generate"},
+  "dependencies": {
+    "@cloudflare/vite-plugin":"1.37.1",
+    "drizzle-orm":"0.45.2",
+    "next":"16.2.6",
+    "react":"19.2.6",
+    "react-dom":"19.2.6",
+    "vinext":"0.0.50",
+    "vite":"8.0.13"
+  },
+  "devDependencies": {
+    "@types/node":"22.19.19",
+    "@types/react":"19.2.14",
+    "@types/react-dom":"19.2.14",
+    "drizzle-kit":"0.31.10",
+    "typescript":"5.9.3"
+  },
+  "type":"module"
+}
