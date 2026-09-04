@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { drizzle } from "drizzle-orm/libsql";
-import { products, priceRecords, promotionTags } from "@/lib/db/schema";
+import { products, priceRecords, promotionTags } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { createClient } from "@libsql/client";
 
-// 初始化数据库连接
 const client = createClient({
   url: process.env.DATABASE_URL!,
   authToken: process.env.DATABASE_AUTH_TOKEN,
